@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background-color: #0f1923;
+  color: #ecf0f1;
+}
+
+/* React Flow overrides */
+.react-flow__background {
+  background-color: #0f1923;
+}
+
+.react-flow__edge-path {
+  stroke: #2c3e50;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1b2a4a;
+}
+::-webkit-scrollbar-thumb {
+  background: #2c3e50;
+  border-radius: 3px;
+}
+
+/* Pulse animation for critical nodes */
+@keyframes pulse-red {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(192, 57, 43, 0);
+  }
+}
+.pulse-critical {
+  animation: pulse-red 2s infinite;
+}
+
+/* Traversal hop animation */
+@keyframes hop-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.hop-enter {
+  animation: hop-in 0.4s ease-out forwards;
+}
+
+/* Streaming text cursor */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.cursor-blink::after {
+  content: "▋";
+  animation: blink 1s infinite;
+  color: #16a085;
+}
