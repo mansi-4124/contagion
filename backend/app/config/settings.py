@@ -30,6 +30,7 @@ class CogneeSettings(BaseSettings):
 
     api_key: str
     default_schema_version: int = 1
+    service_url: str = ""
 
 
 class RedisSettings(BaseSettings):
