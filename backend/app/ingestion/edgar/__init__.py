@@ -1,13 +1,17 @@
-from .client import EdgarClient
-from .exceptions import (
-    EdgarError,
+from app.ingestion.edgar.client import (
+    fetch_company_cik,
+    fetch_10k_filing_url,
+    fetch_10k_text,
+    EdgarClientError,
     CompanyNotFoundError,
-    FilingNotFoundError,
+    NoFilingFoundError,
 )
 
 __all__ = [
-    "EdgarClient",
-    "EdgarError",
+    "fetch_company_cik",
+    "fetch_10k_filing_url",
+    "fetch_10k_text",
+    "EdgarClientError",
     "CompanyNotFoundError",
-    "FilingNotFoundError",
+    "NoFilingFoundError",
 ]
