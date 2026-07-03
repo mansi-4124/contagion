@@ -1,31 +1,28 @@
 import asyncio
+import ssl
 from logging.config import fileConfig
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.ext.asyncio import create_async_engine  # Changed to direct async engine
 
 from alembic import context
 
 from app.config.settings import settings
+from app.models import Base  # Correctly imported models
 
 # Alembic Config object, provides access to values in alembic.ini
 config = context.config
 
 # Inject the Neon URL from our typed Settings object at runtime.
-# settings.database.url comes from DB_URL env var (see app/config/settings.py, D0-05).
 config.set_main_option("sqlalchemy.url", settings.database.url)
 
-# Interpret the config file for Python logging (unchanged from template)
+# Interpret the config file for Python logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Import Base.metadata here once models exist (Day 1, D1-01).
-# Left as None for D0 — alembic still runs fine with no autogenerate target.
-# On D1, change this to:
-#     from app.models.base import Base
-#     target_metadata = Base.metadata
-target_metadata = None
+# Correctly assigned metadata for --autogenerate to see your tables
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
@@ -48,12 +45,18 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 async def run_async_migrations() -> None:
-    """Create an async Engine and run migrations against Neon."""
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,  # don't pool connections for one-off migration runs
-        connect_args={"ssl": "require"},  # Neon requires SSL
+    """Run migrations against Neon PostgreSQL."""
+
+    ssl_context = ssl.create_default_context()
+    print(settings.database.url)
+    connectable = create_async_engine(
+        settings.database.url,
+        poolclass=pool.NullPool,
+        pool_pre_ping=True,
+        connect_args={
+            "ssl": ssl_context,
+            "command_timeout": 60,
+        },
     )
 
     async with connectable.connect() as connection:
@@ -64,6 +67,9 @@ async def run_async_migrations() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode (live DB connection, the normal case)."""
+    import sys
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(run_async_migrations())
 
 

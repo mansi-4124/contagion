@@ -20,6 +20,7 @@ dependencies = [
     "pyjwt>=2.8",
     "python-multipart>=0.0.9",
     "structlog>=24.1",
+    "asyncpg>=0.29.0",
 ]
 
 [project.optional-dependencies]
