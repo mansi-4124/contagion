@@ -24,6 +24,7 @@ dependencies = [
     "pytest",
     "pytest-asyncio",
     "httpx",
+    "litellm"
 ]
 
 [project.optional-dependencies]

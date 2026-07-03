@@ -1,8 +1,24 @@
+"""
+D1-09 — Cognee client wrapper (Cognee 1.2.2, local or Cognee Cloud)
+File: backend/app/cognee/client.py
+
+Parameter names below were verified directly against the installed
+cognee==1.2.2 source (not assumed from docs), since the library has no
+`dataset_name` kwarg on cognify()/search() — only add() accepts it.
+Passing the wrong kwarg to cognify()/search() doesn't error immediately;
+cognify() swallows it into **kwargs and threads it all the way down into
+the raw LLM completion request, which providers with strict schema
+validation (Groq) then reject.
+"""
+
+import os
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Union
 
+import litellm
 import cognee
+from cognee.modules.search.types import SearchType as _CogneeSearchType
 
 from app.config.settings import settings
 
@@ -14,33 +30,66 @@ def _ensure_configured() -> None:
     if _configured:
         return
 
+    # Defensive — harmless if the real leak (wrong kwarg name below) is fixed,
+    # but cheap insurance against any other provider ever rejecting an unknown
+    # top-level field LiteLLM forwards.
+    litellm.drop_params = True
+
+    os.environ.setdefault("ENABLE_BACKEND_ACCESS_CONTROL", "false")
+
+    model_name = settings.llm.model
+    if not model_name.startswith("openai/"):
+        model_name = f"openai/{model_name.removeprefix('groq/')}"
+
     cognee.config.set_llm_config({
-        "llm_provider": "groq",
-        "llm_api_key": settings.llm.groq_api_key,
-        "llm_model": settings.llm.synthesis_model,
+        "llm_provider": "openai",
+        "llm_model": model_name,
+        "llm_api_key": settings.llm.api_key,
+        "llm_endpoint": settings.llm.base_url,
     })
+
     cognee.config.set_embedding_config({
-        "embedding_provider": settings.embedding.provider,  # "fastembed"
-        "embedding_model": settings.embedding.model_name,
+        "embedding_provider": settings.embedding.provider,
+        "embedding_model": settings.embedding.model,
+        "embedding_dimensions": settings.embedding.dimensions,
     })
-    # Cognee Cloud auth — adjust if the SDK exposes a dedicated cloud config call;
-    # some versions read COGNEE_API_KEY from env directly instead of a setter.
-    import os
+
     os.environ.setdefault("COGNEE_API_KEY", settings.cognee.api_key)
+    if settings.cognee.service_url:
+        os.environ.setdefault("COGNEE_SERVICE_URL", settings.cognee.service_url)
 
     _configured = True
 
 
 class SearchType(str, Enum):
+    """Facade over cognee's real SearchType enum — only exposing the subset
+    the Architecture Spec §6.4 actually calls for. Mapped to the real enum
+    in recall() below, since cognee.search()'s query_type param expects an
+    actual SearchType member, not a plain string."""
     GRAPH_COMPLETION = "GRAPH_COMPLETION"
     CHUNKS = "CHUNKS"
     SUMMARIES = "SUMMARIES"
 
 
+_SEARCH_TYPE_MAP = {
+    SearchType.GRAPH_COMPLETION: _CogneeSearchType.GRAPH_COMPLETION,
+    SearchType.CHUNKS: _CogneeSearchType.CHUNKS,
+    SearchType.SUMMARIES: _CogneeSearchType.SUMMARIES,
+}
+
+
 @dataclass(frozen=True)
 class CognifyResult:
-    nodes_created: int
-    edges_created: int
+    status: str
+    pipeline_run_id: str
+    dataset_name: str
+    # NOTE: cognee 1.2.2's PipelineRunInfo does NOT return node/edge counts —
+    # verified against the actual model (status, pipeline_run_id, dataset_id,
+    # dataset_name, payload, data_ingestion_info only). If dataset_namespaces
+    # .node_count/.edge_count (Architecture Spec §5.3) need real numbers,
+    # get them via a follow-up recall() graph query after cognify() completes,
+    # not from this return value. graph_bootstrap (D2-13) already plans a
+    # validation recall() anyway — reuse that instead of parsing this result.
 
 
 @dataclass(frozen=True)
@@ -50,35 +99,75 @@ class RecallResult:
 
 
 async def remember(dataset_name: str, text: str) -> None:
+    """add()'s real param IS `dataset_name` — this one was already correct."""
     _ensure_configured()
     await cognee.add(text, dataset_name=dataset_name)
 
 
 async def cognify(dataset_name: str) -> CognifyResult:
     _ensure_configured()
-    result = await cognee.cognify(dataset_name=dataset_name)
-    # Shape of `result` depends on SDK version — adjust extraction once verified
-    # against your installed cognee version's actual return value.
-    nodes = getattr(result, "nodes_created", 0) or 0
-    edges = getattr(result, "edges_created", 0) or 0
-    return CognifyResult(nodes_created=nodes, edges_created=edges)
+    # Real param is `datasets` (str | list[str] | list[UUID]), NOT dataset_name.
+    result = await cognee.cognify(datasets=dataset_name)
+
+    # Blocking cognify() returns either a single PipelineRunInfo, or a
+    # dict[dataset_id -> PipelineRunInfo] when multiple datasets are processed
+    # (verified against run_pipeline_blocking). We pass a single dataset name,
+    # but handle both shapes defensively.
+    if isinstance(result, dict):
+        run_info = next(iter(result.values())) if result else None
+    else:
+        run_info = result
+
+    if run_info is None:
+        return CognifyResult(status="unknown", pipeline_run_id="", dataset_name=dataset_name)
+
+    return CognifyResult(
+        status=getattr(run_info, "status", "unknown"),
+        pipeline_run_id=str(getattr(run_info, "pipeline_run_id", "")),
+        dataset_name=getattr(run_info, "dataset_name", dataset_name),
+    )
 
 
-async def recall(dataset_name: str, query: str, search_type: SearchType = SearchType.GRAPH_COMPLETION) -> RecallResult:
+async def recall(dataset_name: str, query: str, search_type: SearchType):
     _ensure_configured()
-    raw = await cognee.search(query, dataset_name=dataset_name, search_type=search_type.value)
-    text = raw if isinstance(raw, str) else str(raw)
-    return RecallResult(raw=raw, text=text)
+
+    results = await cognee.search(
+        query_text=query,
+        query_type=_SEARCH_TYPE_MAP[search_type],
+        datasets=dataset_name,
+    )
+
+    if not results:
+        return RecallResult(raw=results, text="")
+
+    if isinstance(results, str):
+        return RecallResult(raw=results, text=results)
+
+    texts = []
+    for r in results:
+        if isinstance(r, str):
+            texts.append(r)
+        elif hasattr(r, "search_result"):
+            texts.append(str(r.search_result))
+        else:
+            texts.append(str(r))
+
+    return RecallResult(raw=results, text="\n\n".join(texts))
 
 
 async def improve(dataset_name: str, edge_ref: dict, weight_delta: float) -> None:
     _ensure_configured()
-    # Cognee's edge-weight update API — wire up once confirmed against SDK docs
-    # for your Cognee Cloud version. Left as an explicit TODO rather than a
-    # silent no-op so it doesn't get missed.
-    raise NotImplementedError("improve() — confirm Cognee Cloud edge-update API before D3")
+    raise NotImplementedError(
+        "improve() — cognee 1.2.2 exposes native remember/recall/forget/improve "
+        "functions (per the startup log) that may map more directly than this "
+        "wrapper's legacy add/cognify/search calls. Inspect cognee.improve()'s "
+        "real signature before implementing this for D3."
+    )
 
 
 async def forget(dataset_name: str, node_ref: dict, reason: str) -> dict:
     _ensure_configured()
-    raise NotImplementedError("forget() — confirm Cognee Cloud node-deletion API before use")
+    raise NotImplementedError(
+        "forget() — same note as improve(): check cognee.forget()'s real "
+        "signature (native API) before implementing, rather than assuming."
+    )
