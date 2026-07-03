@@ -21,6 +21,9 @@ dependencies = [
     "python-multipart>=0.0.9",
     "structlog>=24.1",
     "asyncpg>=0.29.0",
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
 ]
 
 [project.optional-dependencies]
