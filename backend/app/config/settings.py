@@ -166,6 +166,18 @@ class AuthSettings(BaseSettings):
     secret: str = ""
     algorithm: str = "HS256"
 
+class SECSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="SEC_",
+        env_file=str(_ENV_FILE),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    user_agent: str = (
+        "Contagion/1.0 (Educational Project; github.com/<your-github>)"
+    )
+    timeout: float = 30.0
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -183,6 +195,7 @@ class Settings(BaseSettings):
     scheduler: SchedulerSettings = Field(default_factory=SchedulerSettings)
     clerk: ClerkSettings = Field(default_factory=ClerkSettings)
     auth: AuthSettings = Field(default_factory=AuthSettings)
+    sec: SECSettings = Field(default_factory=SECSettings)
 
 
 @lru_cache
