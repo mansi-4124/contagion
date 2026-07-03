@@ -1,7 +1,8 @@
+import base64
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
@@ -104,6 +105,15 @@ class SchedulerSettings(BaseSettings):
 
 
 class ClerkSettings(BaseSettings):
+    """
+    jwks_url / issuer are OPTIONAL overrides. If left blank, both are derived
+    automatically from CLERK_PUBLISHABLE_KEY, since Clerk encodes your
+    instance's frontend-API domain directly inside that key
+    (format: pk_<test|live>_<base64(domain + "$")>).
+    Set CLERK_JWKS_URL / CLERK_ISSUER explicitly only if you're on a custom
+    Clerk domain and the derived value doesn't match.
+    """
+
     model_config = SettingsConfigDict(
         env_prefix="CLERK_",
         env_file=str(_ENV_FILE),
@@ -113,6 +123,34 @@ class ClerkSettings(BaseSettings):
 
     secret_key: str = ""
     publishable_key: str = ""
+    jwks_url: str = ""
+    issuer: str = ""
+    authorized_parties: list[str] = Field(default_factory=list)
+
+    def _domain_from_publishable_key(self) -> str:
+        if not self.publishable_key:
+            raise ValueError(
+                "Set CLERK_PUBLISHABLE_KEY (or explicit CLERK_JWKS_URL + CLERK_ISSUER) "
+                "in .env — neither is currently configured."
+            )
+        parts = self.publishable_key.split("_", 2)
+        if len(parts) != 3 or parts[0] != "pk":
+            raise ValueError(f"Malformed CLERK_PUBLISHABLE_KEY: {self.publishable_key!r}")
+        encoded = parts[2]
+        padded = encoded + "=" * (-len(encoded) % 4)  # restore base64 padding
+        decoded = base64.b64decode(padded).decode("utf-8")
+        domain = decoded.rstrip("$")
+        return f"https://{domain}"
+
+    @property
+    def resolved_issuer(self) -> str:
+        return self.issuer or self._domain_from_publishable_key()
+
+    @property
+    def resolved_jwks_url(self) -> str:
+        if self.jwks_url:
+            return self.jwks_url
+        return f"{self._domain_from_publishable_key()}/.well-known/jwks.json"
 
 
 class AuthSettings(BaseSettings):
