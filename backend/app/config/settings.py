@@ -56,10 +56,12 @@ class LLMSettings(BaseSettings):
         extra="ignore",
     )
 
-    provider: str = "custom"
-    model: str = "groq/llama-3.3-70b-versatile"
+    provider: str = "groq"
+    synthesis_model: str = "llama-3.3-70b-versatile"
+    extraction_model: str = "llama-3.1-8b-instant"
     api_key: str
     base_url: str = "https://api.groq.com/openai/v1"
+    timeout: float = 60.0
 
     @property
     def groq_api_key(self) -> str:

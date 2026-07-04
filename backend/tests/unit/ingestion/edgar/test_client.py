@@ -186,7 +186,37 @@ class TestFetch10KText:
 
     @respx.mock
     @pytest.mark.asyncio
-    async def test_collapses_whitespace(self):
+    async def test_strips_inline_xbrl_hidden_metadata_block(self):
+        # Real production bug: modern SEC filings embed a large invisible
+        # <ix:header>/<ix:hidden> block of tagged facts (fiscal year, boolean
+        # flags, ISO durations like P1Y/P2Y, taxonomy URIs) that BeautifulSoup's
+        # get_text() happily includes since it ignores CSS visibility. This
+        # junk showed up verbatim in production: "nvda-20260125 0001045810
+        # 2026 FY false 362 460 P1Y P2Y P1Y P3Y http://fasb.org/us-g..."
+        url = "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000010/nvda-20260125.htm"
+        html = """
+        <html><body>
+            <ix:header>
+                <ix:hidden>
+                    nvda-20260125 0001045810 2026 FY false 362 460 P1Y P2Y P1Y P3Y
+                    http://fasb.org/us-gaap/2024
+                </ix:hidden>
+            </ix:header>
+            <div style="display:none">more hidden xbrl tag values here</div>
+            <p>NVIDIA relies on TSMC as its sole source foundry in Taiwan.</p>
+        </body></html>
+        """
+        respx.get(url).mock(return_value=httpx.Response(200, text=html))
+
+        text = await fetch_10k_text(url)
+
+        assert "P1Y" not in text
+        assert "fasb.org" not in text
+        assert "more hidden xbrl" not in text
+        assert "TSMC" in text
+        assert "sole source foundry" in text
+
+
         url = "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm"
         html = "<html><body><p>Apple   sources\n\nchips   from   TSMC.</p></body></html>"
         respx.get(url).mock(return_value=httpx.Response(200, text=html))

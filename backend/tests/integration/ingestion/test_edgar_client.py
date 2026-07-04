@@ -15,13 +15,13 @@ import pytest
 
 from app.ingestion.edgar.client import fetch_10k_filing_url, fetch_10k_text
 
-APPLE_CIK = "0000320193"
+NVIDIA_CIK = "0001045810"
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_apple_10k_mentions_tsmc_or_taiwan():
-    filing_url = await fetch_10k_filing_url(APPLE_CIK)
+async def test_nvidia_10k_mentions_tsmc_or_taiwan():
+    filing_url = await fetch_10k_filing_url(NVIDIA_CIK)
     text = await fetch_10k_text(filing_url)
 
     assert len(text) > 0

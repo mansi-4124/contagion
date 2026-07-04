@@ -1,23 +1,27 @@
 """
-Thin async client for SEC EDGAR — CIK lookup, 10-K filing discovery, and filing
-text fetch. Architecture Spec §2 boundary module: nothing outside this file
-imports SEC's APIs directly.
+Thin async client for SEC EDGAR -- CIK lookup, 10-K filing discovery, and
+filing text fetch. Architecture Spec §2 boundary module: nothing outside
+this file imports SEC's APIs directly.
 
 SEC requires every request to carry an identifying User-Agent (name + contact
-email) or it will rate-limit or block the request outright. Set EDGAR_USER_AGENT
-in .env before relying on this against real SEC traffic -- the fallback below
-is a placeholder, not something to ship with.
+email) or it will rate-limit or block the request outright. Configured via
+app.config.settings.SECSettings (SEC_USER_AGENT / SEC_TIMEOUT in .env) --
+NOT a module-level env var, so it comes from the same settings object as
+everything else in the app.
 """
-import os
 import re
+import warnings
 
 import httpx
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 
-EDGAR_USER_AGENT = os.getenv(
-    "EDGAR_USER_AGENT", "Contagion Hackathon Project contact@example.com"
-)
-HEADERS = {"User-Agent": EDGAR_USER_AGENT}
+from app.config.settings import settings
+
+# Some EDGAR filing documents are served as XHTML with an XML declaration,
+# which trips BeautifulSoup's heuristic into warning even though "lxml" (an
+# HTML parser here, not the XML one) handles it fine for our purposes --
+# we only need get_text(), not a strict XML parse.
+warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
 TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 SUBMISSIONS_URL_TEMPLATE = "https://data.sec.gov/submissions/CIK{cik10}.json"
@@ -26,6 +30,24 @@ FILING_URL_TEMPLATE = (
 )
 
 MAX_FILING_CHARS = 50_000
+
+_HIDDEN_STYLE_PATTERN = re.compile(r"display\s*:\s*none", re.IGNORECASE)
+
+
+def _strip_ixbrl_and_hidden_elements(soup: BeautifulSoup) -> None:
+    """
+    Modern SEC filings use Inline XBRL, which embeds a block of
+    machine-readable tagged facts (fiscal year, boolean flags, ISO durations
+    like P1Y/P2Y, taxonomy URIs) inside <ix:header>/<ix:hidden> elements,
+    often near the very top of the document. BeautifulSoup's get_text()
+    doesn't respect CSS visibility and will include this invisible metadata
+    verbatim -- large enough in practice to consume the entire
+    MAX_FILING_CHARS budget before any real narrative content is reached.
+    """
+    for tag in soup.find_all(lambda t: t.name and t.name.lower().startswith("ix:")):
+        tag.decompose()
+    for tag in soup.find_all(style=_HIDDEN_STYLE_PATTERN):
+        tag.decompose()
 
 
 class EdgarClientError(Exception):
@@ -40,8 +62,14 @@ class NoFilingFoundError(EdgarClientError):
     """The company's recent submissions contain no 10-K."""
 
 
+def _headers() -> dict:
+    # Read live from settings each call rather than freezing at import time --
+    # matters for tests that patch settings.sec.user_agent per-case.
+    return {"User-Agent": settings.sec.user_agent}
+
+
 async def _get_json(client: httpx.AsyncClient, url: str) -> dict:
-    response = await client.get(url, headers=HEADERS, timeout=15.0)
+    response = await client.get(url, headers=_headers(), timeout=settings.sec.timeout)
     response.raise_for_status()
     return response.json()
 
@@ -115,9 +143,10 @@ async def fetch_10k_text(url: str, client: httpx.AsyncClient | None = None) -> s
     owns_client = client is None
     client = client or httpx.AsyncClient()
     try:
-        response = await client.get(url, headers=HEADERS, timeout=30.0)
+        response = await client.get(url, headers=_headers(), timeout=settings.sec.timeout)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "lxml")
+        _strip_ixbrl_and_hidden_elements(soup)
         text = soup.get_text(separator=" ", strip=True)
         text = re.sub(r"\s+", " ", text)
         return text[:MAX_FILING_CHARS]
