@@ -37,7 +37,7 @@ def _ensure_configured() -> None:
 
     os.environ.setdefault("ENABLE_BACKEND_ACCESS_CONTROL", "false")
 
-    model_name = settings.llm.model
+    model_name = settings.llm.extraction_model
     if not model_name.startswith("openai/"):
         model_name = f"openai/{model_name.removeprefix('groq/')}"
 
