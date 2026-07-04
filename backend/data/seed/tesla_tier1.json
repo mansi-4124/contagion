@@ -1,0 +1,26 @@
+[
+  {
+    "supplier_name": "Panasonic Energy",
+    "component_supplied": "lithium_batteries",
+    "country": "Japan",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  },
+  {
+    "supplier_name": "CATL",
+    "component_supplied": "lithium_batteries",
+    "country": "China",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  },
+  {
+    "supplier_name": "LG Energy Solution",
+    "component_supplied": "lithium_batteries",
+    "country": "South Korea",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  }
+]

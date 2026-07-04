@@ -1,0 +1,82 @@
+[
+  {
+    "supplier_name": "China mainland is a location rather than a company name. However, the 'People's Republic of China' is often referred to as  China  however, a company in china can be referred to by a number of names  but the company with one of the most widely recognized names in china\n\nHuawei",
+    "component_supplied": "manufacturing",
+    "country": "China",
+    "exclusivity": null,
+    "risk_notes": "Restrictive measures can increase the cost or limit the availability of the components and raw materials",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "India",
+    "component_supplied": "manufacturing",
+    "country": "India",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Japan",
+    "component_supplied": "manufacturing",
+    "country": "Japan",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "SAMSUNG",
+    "component_supplied": "manufacturing",
+    "country": "South Korea",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Taiwan",
+    "component_supplied": "manufacturing",
+    "country": "Taiwan",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Vietnam",
+    "component_supplied": "manufacturing",
+    "country": "Vietnam",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "TSMC",
+    "component_supplied": "semiconductor_chips",
+    "country": "Taiwan",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  },
+  {
+    "supplier_name": "Foxconn",
+    "component_supplied": "smartphones",
+    "country": "Taiwan",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  },
+  {
+    "supplier_name": "Samsung Electronics",
+    "component_supplied": "display_panels",
+    "country": "South Korea",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  },
+  {
+    "supplier_name": "Largan Precision",
+    "component_supplied": "camera_modules",
+    "country": "Taiwan",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  }
+]

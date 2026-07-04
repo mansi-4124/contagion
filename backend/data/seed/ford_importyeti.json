@@ -1,0 +1,23 @@
+[
+  {
+    "shipper_name": "Panasonic Energy",
+    "hs_code": "850760",
+    "shipment_count": 47,
+    "country": "Japan",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "Bosch",
+    "hs_code": "848590",
+    "shipment_count": 133,
+    "country": "Germany",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "ZF Friedrichshafen",
+    "hs_code": "840999",
+    "shipment_count": 58,
+    "country": "Germany",
+    "source": "fallback_seed"
+  }
+]

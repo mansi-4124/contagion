@@ -29,7 +29,7 @@ FILING_URL_TEMPLATE = (
     "https://www.sec.gov/Archives/edgar/data/{cik_no_zeros}/{accession_no_dashes}/{primary_document}"
 )
 
-MAX_FILING_CHARS = 50_000
+MAX_FILING_CHARS = 400_000
 
 _HIDDEN_STYLE_PATTERN = re.compile(r"display\s*:\s*none", re.IGNORECASE)
 

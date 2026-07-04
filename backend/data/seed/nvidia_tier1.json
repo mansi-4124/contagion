@@ -1,0 +1,66 @@
+[
+  {
+    "supplier_name": "TSMC",
+    "component_supplied": "semiconductor wafers",
+    "country": "Taiwan",
+    "exclusivity": "null",
+    "risk_notes": "null",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Samsung",
+    "component_supplied": "semiconductor wafers and memory",
+    "country": "South Korea",
+    "exclusivity": "null",
+    "risk_notes": "null",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Hynix",
+    "component_supplied": "memory",
+    "country": "South Korea",
+    "exclusivity": "null",
+    "risk_notes": "null",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Micron",
+    "component_supplied": "memory",
+    "country": "United States",
+    "exclusivity": "null",
+    "risk_notes": "null",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Foxconn",
+    "component_supplied": "assembly, testing and packaging of final products",
+    "country": "Taiwan",
+    "exclusivity": "null",
+    "risk_notes": "null",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Wistron",
+    "component_supplied": "assembly, testing and packaging of final products",
+    "country": "Taiwan",
+    "exclusivity": "null",
+    "risk_notes": "null",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Fabrinet",
+    "component_supplied": "assembly, testing and packaging of final products",
+    "country": "United States",
+    "exclusivity": "null",
+    "risk_notes": "null",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "SK Hynix",
+    "component_supplied": "memory_chips",
+    "country": "South Korea",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  }
+]

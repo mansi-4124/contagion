@@ -1,0 +1,23 @@
+[
+  {
+    "shipper_name": "Panasonic Energy",
+    "hs_code": "850760",
+    "shipment_count": 88,
+    "country": "Japan",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "CATL",
+    "hs_code": "850760",
+    "shipment_count": 152,
+    "country": "China",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "LG Energy Solution",
+    "hs_code": "850760",
+    "shipment_count": 74,
+    "country": "South Korea",
+    "source": "fallback_seed"
+  }
+]

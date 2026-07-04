@@ -1,0 +1,30 @@
+[
+  {
+    "shipper_name": "TSMC",
+    "hs_code": "854231",
+    "shipment_count": 210,
+    "country": "Taiwan",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "Foxconn",
+    "hs_code": "851712",
+    "shipment_count": 340,
+    "country": "Taiwan",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "Samsung Electronics",
+    "hs_code": "852410",
+    "shipment_count": 95,
+    "country": "South Korea",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "Largan Precision",
+    "hs_code": "852580",
+    "shipment_count": 61,
+    "country": "Taiwan",
+    "source": "fallback_seed"
+  }
+]

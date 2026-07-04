@@ -1,0 +1,50 @@
+[
+  {
+    "supplier_name": "Ford",
+    "component_supplied": "inflators",
+    "country": null,
+    "exclusivity": null,
+    "risk_notes": "Potential costs of recall, limited ability to recover from supplier",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "ARC",
+    "component_supplied": "inflators",
+    "country": null,
+    "exclusivity": null,
+    "risk_notes": "Potential costs of recall",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Delphi",
+    "component_supplied": "inflators",
+    "country": null,
+    "exclusivity": null,
+    "risk_notes": "Potential costs of recall",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Panasonic Energy",
+    "component_supplied": "lithium_batteries",
+    "country": "Japan",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  },
+  {
+    "supplier_name": "Bosch",
+    "component_supplied": "machine_parts",
+    "country": "Germany",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  },
+  {
+    "supplier_name": "ZF Friedrichshafen",
+    "component_supplied": "engine_parts",
+    "country": "Germany",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  }
+]

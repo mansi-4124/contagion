@@ -1,0 +1,23 @@
+[
+  {
+    "shipper_name": "Lonza Group",
+    "hs_code": "293399",
+    "shipment_count": 51,
+    "country": "Switzerland",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "Catalent",
+    "hs_code": "300490",
+    "shipment_count": 39,
+    "country": "United States",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "Siegfried Holding",
+    "hs_code": "293399",
+    "shipment_count": 22,
+    "country": "Switzerland",
+    "source": "fallback_seed"
+  }
+]

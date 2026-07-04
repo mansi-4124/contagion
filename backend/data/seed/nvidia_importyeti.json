@@ -1,0 +1,23 @@
+[
+  {
+    "shipper_name": "TSMC",
+    "hs_code": "854231",
+    "shipment_count": 198,
+    "country": "Taiwan",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "SK Hynix",
+    "hs_code": "854232",
+    "shipment_count": 67,
+    "country": "South Korea",
+    "source": "fallback_seed"
+  },
+  {
+    "shipper_name": "Foxconn",
+    "hs_code": "854239",
+    "shipment_count": 44,
+    "country": "Taiwan",
+    "source": "fallback_seed"
+  }
+]

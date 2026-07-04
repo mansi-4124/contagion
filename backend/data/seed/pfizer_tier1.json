@@ -1,0 +1,50 @@
+[
+  {
+    "supplier_name": "Multiple suppliers worldwide",
+    "component_supplied": "raw materials",
+    "country": null,
+    "exclusivity": null,
+    "risk_notes": "the availability of raw materials to have a significant impact on our operations in 2026, but are monitoring potential supply chain disruptions as a result of ongoing geopolitical and trade negotiations",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "No information was available about the company 'PC1'",
+    "component_supplied": "specialty active pharmaceutical ingredients",
+    "country": null,
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "UPS",
+    "component_supplied": "pharmaceutical products",
+    "country": null,
+    "exclusivity": null,
+    "risk_notes": "exposure of our operations globally to possible capital and exchange controls, economic conditions, expropriation, sanctions, tariffs and/or other restrictive government actions",
+    "source": "edgar_inferred"
+  },
+  {
+    "supplier_name": "Lonza Group",
+    "component_supplied": "pharma_intermediates",
+    "country": "Switzerland",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  },
+  {
+    "supplier_name": "Catalent",
+    "component_supplied": "pharmaceutical_apis",
+    "country": "United States",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  },
+  {
+    "supplier_name": "Siegfried Holding",
+    "component_supplied": "pharma_intermediates",
+    "country": "Switzerland",
+    "exclusivity": null,
+    "risk_notes": null,
+    "source": "trade_inferred"
+  }
+]
