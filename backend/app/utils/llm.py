@@ -21,7 +21,17 @@ from app.config.settings import settings
 
 DEFAULT_RETRY_SLEEP_SECONDS = 3.0
 DEFAULT_MAX_RETRIES = 3
+DEFAULT_MODEL = "llama-3.3-70b-versatile"
 
+def _strip_provider_prefix(model: str) -> str:
+    """
+    "groq/llama-3.3-70b-versatile" -> "llama-3.3-70b-versatile"
+ 
+    LiteLLM/Cognee's "provider/model" convention isn't understood by the
+    native groq SDK, which wants just the model name. A bare model name
+    with no "/" passes through unchanged.
+    """
+    return model.split("/", 1)[1] if "/" in model else model
 
 class GroqClient:
     def __init__(
@@ -33,8 +43,10 @@ class GroqClient:
         retry_sleep_seconds: float = DEFAULT_RETRY_SLEEP_SECONDS,
     ):
         self._client = AsyncGroq(api_key=api_key or settings.llm.groq_api_key)
-        self.synthesis_model = synthesis_model or settings.llm.synthesis_model
-        self.extraction_model = extraction_model or settings.llm.extraction_model
+        configured_model = getattr(settings.llm, "model", None)
+        default_model = _strip_provider_prefix(configured_model) if configured_model else DEFAULT_MODEL
+        self.synthesis_model = (synthesis_model or getattr(settings.llm, "synthesis_model", None) or default_model)
+        self.extraction_model = (extraction_model or getattr(settings.llm, "extraction_model", None) or default_model)
         self.max_retries = max_retries
         self.retry_sleep_seconds = retry_sleep_seconds
 
@@ -60,6 +72,6 @@ class GroqClient:
         """Higher-quality model -- recommendations, risk-event summaries, free-text synthesis."""
         return await self._call(self.synthesis_model, prompt)
 
-    async def call_extraction(self, prompt: str) -> str:
+    async def call_extraction(self, prompt: str, json_mode:bool = True) -> str:
         """Cheaper/faster model -- structured extraction, classification, high call volume."""
-        return await self._call(self.extraction_model, prompt, json_mode=True)
+        return await self._call(self.extraction_model, prompt, json_mode=json_mode)

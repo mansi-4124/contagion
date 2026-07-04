@@ -108,6 +108,15 @@ class TestNormalizeCompanyName:
         assert llm.call_extraction.call_count == 2
 
     @pytest.mark.asyncio
+    async def test_calls_llm_with_json_mode_disabled(self):
+        llm = make_mock_llm("TSMC")
+ 
+        await normalize_company_name("Taiwan Semiconductor", llm=llm)
+ 
+        _, kwargs = llm.call_extraction.call_args
+        assert kwargs.get("json_mode") is False
+
+    @pytest.mark.asyncio
     async def test_cache_persists_across_separate_calls_without_explicit_llm_reuse(self):
         # Simulates two call sites in the app each constructing their own
         # GroqClient -- the cache is module-level, not tied to one client.

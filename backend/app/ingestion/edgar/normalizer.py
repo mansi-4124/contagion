@@ -59,7 +59,7 @@ async def normalize_company_name(name: str, llm: GroqClient | None = None) -> st
 
     llm = llm or GroqClient()
     prompt = _build_prompt(name)
-    raw_response = await llm.call_extraction(prompt)
+    raw_response = await llm.call_extraction(prompt, json_mode=False)
     canonical = _clean_response(raw_response)
 
     _cache[key] = canonical
