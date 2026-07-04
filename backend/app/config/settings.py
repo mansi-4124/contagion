@@ -181,6 +181,22 @@ class SECSettings(BaseSettings):
     )
     timeout: float = 30.0
 
+class ComtradeSettings(BaseSettings):
+    """UN Comtrade now requires a subscription key even for preview-tier
+    calls (confirmed against their current developer portal — the old
+    no-registration preview endpoint no longer works). Leave subscription_key
+    blank to force fallback-only mode during development."""
+
+    model_config = SettingsConfigDict(
+        env_prefix="COMTRADE_",
+        env_file=str(_ENV_FILE),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    subscription_key: str = ""
+    base_url: str = "https://comtradeapi.un.org/data/v1/get"
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=str(_ENV_FILE),
@@ -198,6 +214,7 @@ class Settings(BaseSettings):
     clerk: ClerkSettings = Field(default_factory=ClerkSettings)
     auth: AuthSettings = Field(default_factory=AuthSettings)
     sec: SECSettings = Field(default_factory=SECSettings)
+    comtrade: ComtradeSettings = Field(default_factory=ComtradeSettings)
 
 
 @lru_cache
